@@ -9,16 +9,23 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev libxslt1-dev libevent-dev libsasl2-dev \
     libldap2-dev libpq-dev libpng-dev libjpeg-dev \
     build-essential node-less npm git \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install RTL support for right-to-left languages
 RUN npm install -g rtlcss
 
-# Install Python requirements from the source folder
-# Using --break-system-packages for Ubuntu 24.04 compatibility
+# Create a system user for Odoo
+RUN useradd -m -U -r -d /opt/odoo -s /bin/bash odoo
+
+# Optimization: Install Python requirements separately for better caching
 COPY ./src/requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
 
-# Create a system user for Odoo
-RUN useradd -m -U -r -d /opt/odoo -s /bin/bash odoo
+# Set ODOO_RC environment variable
+ENV ODOO_RC /etc/odoo/odoo.conf
+
+# Give ownership to odoo user
+RUN chown -R odoo:odoo /opt/odoo
+
 USER odoo

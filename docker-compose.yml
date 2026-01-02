@@ -2,26 +2,32 @@ services:
   db:
     image: postgres:17
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=odoo
-      - POSTGRES_USER=odoo
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-odoo}
+      - POSTGRES_USER=${POSTGRES_USER:-odoo}
     volumes:
       - ./db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-odoo} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8069:8069"
     volumes:
-      - ./src:/opt/odoo/src:ro # CORE: Read-only safety
-      - ./custom_addons:/mnt/extra-addons # CUSTOM: Your development area
+      - ./src:/opt/odoo/src:ro
+      - ./custom_addons:/mnt/extra-addons
       - ./config:/etc/odoo
       - ./data:/var/lib/odoo
-    environment:
-      - HOST=db
-      - USER=odoo
-      - PASSWORD=odoo
+    env_file:
+      - .env
     command: >
-      python3 /opt/odoo/src/odoo-bin  --config=/etc/odoo/odoo.conf  --dev=reload,xml,qweb
+      python3 /opt/odoo/src/odoo-bin
+      --config=/etc/odoo/odoo.conf
+      --dev=reload,xml,qweb
