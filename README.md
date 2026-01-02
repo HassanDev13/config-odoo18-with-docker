@@ -8,6 +8,7 @@ This repository provides a premium, best-practice development environment for Od
 - **One-Command Setup**: Get started in seconds with `make`.
 - **Healthchecks**: Reliable startup (Odoo waits for the DB).
 - **Environment Driven**: Secure configuration via `.env`.
+- **Database Admin UI**: Adminer included for easy database inspection.
 - **RTL Support**: Pre-configured `rtlcss` for Arabic translations.
 
 ---
@@ -52,6 +53,7 @@ We use a `Makefile` to make development easier. Here are the most used commands:
 | `make update m=module_name` | Update a specific Odoo module |
 | `make shell` | Enter the Odoo interactive shell |
 | `make shell-db` | Enter the PostgreSQL command line |
+| `make db-admin` | Open Adminer (Database UI) at http://localhost:8080 |
 | `make down` | Stop and remove all containers |
 
 ---
